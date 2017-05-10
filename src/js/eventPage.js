@@ -406,6 +406,28 @@ function discardAllTabsInAllWindows() {
   });
 }
 
+function closeAllDiscardedTabs() {
+  chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+    var curWindowId = tabs[0].windowId;
+    chrome.windows.get(curWindowId, {populate: true}, function(curWindow) {
+      curWindow.tabs.forEach(function (tab) {
+        if (isDiscarded(tab)) {
+          chrome.tabs.remove(tab.id);
+        }
+      });
+    });
+  });
+}
+
+function closeDiscardedTabsInAllWindows() {
+  chrome.tabs.query({}, function (tabs) {
+    tabs.forEach(function (currentTab) {
+      if (isDiscarded(tab))
+        chrome.tabs.remove(tab.id);
+    });
+  });
+}
+
 function reloadAllTabs() {
   chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
     var curWindowId = tabs[0].windowId;
@@ -625,6 +647,10 @@ function messageRequestListener(request, sender, sendResponse) {
     reloadSelectedTabs();
     break;
 
+  case 'closeAllDiscarded':
+      closeAllDiscardedTabs();
+      break;
+
   default:
     break;
   }
@@ -652,6 +678,10 @@ function commandListener (command) {
 
   } else if (command === '6-reload-all-windows') {
     reloadAllTabsInAllWindows();
+  } else if (command === '7-close-all-discarded-tabs') {
+       closeAllDiscardedTabs();
+  } else if (command === '8-close-all-discarded-windows') {
+       closeDiscardedTabsInAllWindows();
   }
 }
 
